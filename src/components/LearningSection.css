@@ -1,0 +1,279 @@
+.learning-section {
+  width: 100%;
+}
+
+.learning-header {
+  margin-bottom: 2rem;
+}
+
+.learning-header h2 {
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+/* Search results */
+.search-results {
+  margin-bottom: 2rem;
+}
+
+.search-results h3 {
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.search-results p {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.techniques-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.technique-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.technique-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.technique-card h4 {
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.technique-category {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Categories container */
+.categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.category-section {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.category-header {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-header:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.category-header.active {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.category-arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.category-header.active .category-arrow {
+  transform: rotate(180deg);
+}
+
+/* Subcategories */
+.subcategories-container {
+  background: #f8f9fa;
+}
+
+.subcategory-section {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.subcategory-section:last-child {
+  border-bottom: none;
+}
+
+.subcategory-header {
+  width: 100%;
+  background: #f8f9fa;
+  color: #333;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid transparent;
+}
+
+.subcategory-header:hover {
+  background: #e9ecef;
+  border-left-color: #667eea;
+}
+
+.subcategory-header.active {
+  background: #e9ecef;
+  border-left-color: #667eea;
+  color: #667eea;
+}
+
+.subcategory-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.subcategory-header.active .subcategory-arrow {
+  transform: rotate(180deg);
+}
+
+/* Techniques list */
+.techniques-list {
+  background: white;
+  padding: 0 1.5rem;
+}
+
+.technique-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.technique-item:last-child {
+  border-bottom: none;
+}
+
+.technique-item:hover {
+  background: #f8f9fa;
+  margin: 0 -1.5rem;
+  padding: 1rem 1.5rem;
+}
+
+.technique-name {
+  color: #333;
+  font-weight: 500;
+  flex: 1;
+}
+
+.learn-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 1rem;
+}
+
+.learn-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .learning-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .category-header {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .subcategory-header {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .techniques-list {
+    padding: 0 1rem;
+  }
+  
+  .technique-item {
+    padding: 0.75rem 0;
+  }
+  
+  .technique-item:hover {
+    margin: 0 -1rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .learn-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .techniques-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+} 
