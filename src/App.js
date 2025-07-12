@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>BJJ Tracker</h1>
+        <h1>Mōst Dope BJJ Tracker</h1>
         <nav className="nav-tabs">
           <button 
             className={`nav-tab ${activeSection === 'tracking' ? 'active' : ''}`}
