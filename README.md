@@ -1,70 +1,216 @@
-# Getting Started with Create React App
+# 🥋 BJJ Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive mobile-first web application for tracking Brazilian Jiu-Jitsu training sessions, submissions, and learning techniques.
 
-## Available Scripts
+## ✨ Features
 
-In the project directory, you can run:
+### 📊 Training Tracking
+- **Mat Hours Logging**: Track training time with decimal precision (e.g., 1.5 hours)
+- **Submission Tracking**: Log submissions you got vs. submissions done on you
+- **Dropdown Selection**: Choose from 25+ common BJJ submissions instead of typing
+- **Training Notes**: Add detailed notes about techniques worked on, partners, etc.
+- **Date-based Organization**: Entries grouped by date with newest first
+- **Edit & Delete**: Modify existing entries or remove incorrect data
+- **Local Storage**: All data persists between sessions
 
-### `npm start`
+### 📚 Learning Section
+- **Comprehensive Technique Library**: Organized by categories and subcategories
+- **Search Functionality**: Find techniques quickly across all categories
+- **Collapsible Categories**: Clean, organized navigation
+- **Categories Include**:
+  - Guard (Closed, Open, Half)
+  - Side Control (Escapes, Submissions)
+  - Mount (Escapes, Submissions)
+  - Back Control (Submissions, Control)
+  - Takedowns (Single Leg, Double Leg, Throws)
+  - Leg Locks (Heel Hooks, Ankle Locks, Knee Bars)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 📈 Analytics Dashboard
+- **Overview Statistics**: Total mat hours, sessions, average session length, submission ratio
+- **Hollow Pie Chart**: Visual representation of submissions given vs. received
+- **Recent Trends**: Last 4 weeks of training data
+- **Weekly Hours Chart**: Visual progress bars showing training consistency
+- **Top Submissions**: Your most successful moves and common weaknesses
+- **Real-time Calculations**: All analytics update automatically
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🎨 Design Features
+- **Mobile-First**: Optimized for mobile devices with responsive design
+- **Modern UI**: Gradient backgrounds, card-based design, smooth animations
+- **Touch-Friendly**: Large buttons and intuitive interactions
+- **PWA Ready**: Can be installed as a progressive web app
+- **Accessibility**: Proper focus states and semantic HTML
 
-### `npm test`
+## 🚀 Getting Started
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
+- Node.js (version 14 or higher)
+- npm or yarn
 
-### `npm run build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd bjj-tracker
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-### `npm run eject`
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Building for Production
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm run build
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+This creates a `build` folder with optimized production files.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📱 Usage Guide
 
-## Learn More
+### Adding Training Entries
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Navigate to Tracking Section**
+   - Click the "📊 Tracking" tab
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Add New Entry**
+   - Click the "+ Add Entry" button
+   - Fill in the date, mat hours, submissions, and notes
+   - Use the dropdown to select submissions from the predefined list
+   - Click "Save Entry"
 
-### Code Splitting
+3. **Editing Entries**
+   - Click the ✏️ edit button on any entry
+   - Modify the data as needed
+   - Click "Update Entry" to save changes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+4. **Deleting Entries**
+   - Click the 🗑️ delete button on any entry
+   - Confirm the deletion
 
-### Analyzing the Bundle Size
+### Using the Learning Section
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1. **Browse Techniques**
+   - Click the "📚 Learning" tab
+   - Expand categories to see subcategories
+   - Click on subcategories to view techniques
 
-### Making a Progressive Web App
+2. **Search Techniques**
+   - Use the search bar to find specific techniques
+   - Results show technique name and category
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Viewing Analytics
 
-### Advanced Configuration
+1. **Access Analytics**
+   - Click the "📈 Analytics" tab
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+2. **Review Statistics**
+   - View overview cards with key metrics
+   - Examine the pie chart for submission ratio
+   - Check recent trends and weekly progress
+   - Review top submissions analysis
 
-### Deployment
+## 🛠️ Technical Details
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Built With
+- **React 19**: Modern React with hooks
+- **CSS3**: Custom styling with Flexbox and Grid
+- **Local Storage**: Client-side data persistence
+- **SVG**: Custom pie chart implementation
+- **Progressive Web App**: Mobile installation support
 
-### `npm run build` fails to minify
+### Project Structure
+```
+bjj-tracker/
+├── public/
+│   ├── index.html
+│   └── manifest.json
+├── src/
+│   ├── components/
+│   │   ├── TrackingSection.js
+│   │   ├── TrackingSection.css
+│   │   ├── LearningSection.js
+│   │   ├── LearningSection.css
+│   │   ├── AnalyticsSection.js
+│   │   └── AnalyticsSection.css
+│   ├── App.js
+│   ├── App.css
+│   ├── index.js
+│   └── index.css
+├── package.json
+└── README.md
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Data Structure
+Training entries are stored with the following structure:
+```javascript
+{
+  id: Date.now(),
+  date: "2024-01-15",
+  matHours: "1.5",
+  submissionsGot: ["Triangle Choke", "Armbar"],
+  submissionsReceived: ["Guillotine Choke"],
+  notes: "Worked on guard retention..."
+}
+```
+
+## 📊 Available Submissions
+
+The app includes 25+ common BJJ submissions:
+
+**Chokes:**
+- Triangle Choke, Guillotine Choke, Rear Naked Choke, Cross Collar Choke, Bow and Arrow Choke, North South Choke, Paper Cutter Choke, Arm Triangle, Anaconda Choke, D'Arce Choke, Peruvian Necktie, Gogoplata
+
+**Joint Locks:**
+- Armbar, Kimura, Americana, Omoplata
+
+**Leg Locks:**
+- Heel Hook, Ankle Lock, Kneebar, Straight Ankle Lock, Achilles Lock, Inside Heel Hook, Outside Heel Hook, Calf Slicer
+
+## 🎯 Key Features
+
+### Data Persistence
+- All training data is automatically saved to localStorage
+- No backend required - works completely offline
+- Data persists between browser sessions
+
+### Mobile Optimization
+- Responsive design that works on all screen sizes
+- Touch-friendly interface optimized for mobile devices
+- Can be installed as a PWA on mobile devices
+
+### Performance
+- Efficient React components with proper memoization
+- Optimized calculations for analytics
+- Smooth animations and transitions
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built for the BJJ community to track training progress
+- Inspired by the need for better training session tracking
+- Designed with mobile-first approach for on-the-go usage
+
+---
+
+**Happy Training! 🥋**
