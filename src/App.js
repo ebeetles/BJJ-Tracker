@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import TrackingSection from './components/TrackingSection';
 import LearningSection from './components/LearningSection';
@@ -51,13 +51,7 @@ function App() {
   }, []);
 
   // Load user-specific tracking data when user changes
-  useEffect(() => {
-    if (user?.email) {
-      loadTrackingData();
-    }
-  }, [user]);
-
-  const loadTrackingData = async () => {
+  const loadTrackingData = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('tracking_entries')
@@ -74,9 +68,16 @@ function App() {
     } catch (error) {
       console.error('Error loading tracking data:', error);
     }
-  };
+  }, [user]);
 
-  const saveTrackingData = async (data) => {
+  useEffect(() => {
+    if (user?.email) {
+      loadTrackingData();
+    }
+  }, [user, loadTrackingData]);
+
+  // Save tracking data to Supabase whenever it changes
+  const saveTrackingData = useCallback(async (data) => {
     try {
       // Delete existing entries for this user
       await supabase
@@ -106,14 +107,13 @@ function App() {
     } catch (error) {
       console.error('Error saving tracking data:', error);
     }
-  };
+  }, [user]);
 
-  // Save tracking data to Supabase whenever it changes
   useEffect(() => {
     if (user?.email && trackingData.length > 0) {
       saveTrackingData(trackingData);
     }
-  }, [trackingData, user]);
+  }, [trackingData, user, saveTrackingData]);
 
   // Google Sign-In initialization
   useEffect(() => {
