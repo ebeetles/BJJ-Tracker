@@ -59,20 +59,23 @@ function App() {
       }
     };
 
-    // Try to initialize immediately
-    initializeGoogleSignIn();
+    // Only initialize if user is not signed in
+    if (!user) {
+      // Try to initialize immediately
+      initializeGoogleSignIn();
 
-    // If Google script isn't loaded yet, wait for it
-    if (!window.google) {
-      const checkGoogleLoaded = setInterval(() => {
-        if (window.google) {
-          clearInterval(checkGoogleLoaded);
-          initializeGoogleSignIn();
-        }
-      }, 100);
+      // If Google script isn't loaded yet, wait for it
+      if (!window.google) {
+        const checkGoogleLoaded = setInterval(() => {
+          if (window.google) {
+            clearInterval(checkGoogleLoaded);
+            initializeGoogleSignIn();
+          }
+        }, 100);
 
-      // Cleanup interval after 10 seconds
-      setTimeout(() => clearInterval(checkGoogleLoaded), 10000);
+        // Cleanup interval after 10 seconds
+        setTimeout(() => clearInterval(checkGoogleLoaded), 10000);
+      }
     }
 
     // Cleanup function
@@ -81,7 +84,7 @@ function App() {
         window.google.accounts.id.cancel();
       }
     };
-  }, []); // Remove user dependency to prevent re-initialization
+  }, [user]); // Add user dependency
 
   // Handle button rendering when user state changes
   useEffect(() => {
