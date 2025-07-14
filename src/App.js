@@ -174,7 +174,7 @@ function App() {
   const handleGoogleResponse = async (response) => {
     try {
       // Sign in with Supabase using Google token
-      const { data, error } = await supabase.auth.signInWithIdToken({
+      const { error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
         token: response.credential,
       });
