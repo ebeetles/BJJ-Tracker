@@ -3,51 +3,124 @@ import './App.css';
 import TrackingSection from './components/TrackingSection';
 import LearningSection from './components/LearningSection';
 import AnalyticsSection from './components/AnalyticsSection';
+import { supabase } from './supabase';
 
 function App() {
   const [activeSection, setActiveSection] = useState('tracking');
   const [trackingData, setTrackingData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Google Auth State
   const [user, setUser] = useState(null);
   const [showConsent, setShowConsent] = useState(false);
   const [googleLoaded, setGoogleLoaded] = useState(false);
-  const [consentedEmails, setConsentedEmails] = useState(() => {
-    const saved = localStorage.getItem('bjjConsentedEmails');
-    return saved ? JSON.parse(saved) : [];
-  });
   const googleButtonRef = useRef(null);
+
+  // Initialize Supabase auth listener
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          name: session.user.user_metadata?.full_name || session.user.email,
+          email: session.user.email,
+          picture: session.user.user_metadata?.avatar_url
+        });
+      }
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser({
+            name: session.user.user_metadata?.full_name || session.user.email,
+            email: session.user.email,
+            picture: session.user.user_metadata?.avatar_url
+          });
+        } else {
+          setUser(null);
+          setTrackingData([]);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Load user-specific tracking data when user changes
   useEffect(() => {
-    if (user && user.email) {
-      const userKey = `bjjTrackingData_${user.email}`;
-      const saved = localStorage.getItem(userKey);
-      setTrackingData(saved ? JSON.parse(saved) : []);
-    } else {
-      setTrackingData([]);
+    if (user?.email) {
+      loadTrackingData();
     }
   }, [user]);
 
-  // Save tracking data to localStorage whenever it changes (user-specific)
+  const loadTrackingData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tracking_entries')
+        .select('*')
+        .eq('user_email', user.email)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading data:', error);
+        return;
+      }
+
+      setTrackingData(data || []);
+    } catch (error) {
+      console.error('Error loading tracking data:', error);
+    }
+  };
+
+  const saveTrackingData = async (data) => {
+    try {
+      // Delete existing entries for this user
+      await supabase
+        .from('tracking_entries')
+        .delete()
+        .eq('user_email', user.email);
+
+      // Insert new entries
+      if (data.length > 0) {
+        const entriesToInsert = data.map(entry => ({
+          user_email: user.email,
+          date: entry.date,
+          hours: entry.hours,
+          submissions_got: entry.submissionsGot,
+          submissions_received: entry.submissionsReceived,
+          notes: entry.notes
+        }));
+
+        const { error } = await supabase
+          .from('tracking_entries')
+          .insert(entriesToInsert);
+
+        if (error) {
+          console.error('Error saving data:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving tracking data:', error);
+    }
+  };
+
+  // Save tracking data to Supabase whenever it changes
   useEffect(() => {
-    if (user && user.email) {
-      const userKey = `bjjTrackingData_${user.email}`;
-      localStorage.setItem(userKey, JSON.stringify(trackingData));
+    if (user?.email && trackingData.length > 0) {
+      saveTrackingData(trackingData);
     }
   }, [trackingData, user]);
-
-  // Save consented emails to localStorage
-  useEffect(() => {
-    localStorage.setItem('bjjConsentedEmails', JSON.stringify(consentedEmails));
-  }, [consentedEmails]);
 
   // Google Sign-In initialization
   useEffect(() => {
     const initializeGoogleSignIn = () => {
       if (window.google && googleButtonRef.current && !user) {
         window.google.accounts.id.initialize({
-          client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com', // TODO: Replace with your actual Google Client ID
+          client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
           callback: handleGoogleResponse,
         });
         window.google.accounts.id.renderButton(googleButtonRef.current, {
@@ -84,7 +157,7 @@ function App() {
         window.google.accounts.id.cancel();
       }
     };
-  }, [user]); // Add user dependency
+  }, [user]);
 
   // Handle button rendering when user state changes
   useEffect(() => {
@@ -98,34 +171,28 @@ function App() {
     }
   }, [user, googleLoaded]);
 
-  const handleGoogleResponse = (response) => {
-    // Decode JWT to get user info
-    const base64Url = response.credential.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join('')
-    );
-    const userInfo = JSON.parse(jsonPayload);
-    setUser({
-      name: userInfo.name,
-      email: userInfo.email,
-      picture: userInfo.picture,
-    });
-    setShowConsent(true);
+  const handleGoogleResponse = async (response) => {
+    try {
+      // Sign in with Supabase using Google token
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: response.credential,
+      });
+
+      if (error) {
+        console.error('Error signing in:', error);
+        return;
+      }
+
+      setShowConsent(true);
+    } catch (error) {
+      console.error('Error during sign in:', error);
+    }
   };
 
   const handleConsent = (consent) => {
     setShowConsent(false);
-    if (consent && user && user.email) {
-      setConsentedEmails((prev) =>
-        prev.includes(user.email) ? prev : [...prev, user.email]
-      );
-    }
+    // Consent is handled automatically by Supabase
   };
 
   const addTrackingEntry = (entry) => {
@@ -136,6 +203,22 @@ function App() {
       setTrackingData(prev => [...prev, { ...entry, id: Date.now() }]);
     }
   };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
 
   // Show sign-in page if user is not authenticated
   if (!user) {
@@ -163,7 +246,7 @@ function App() {
           <div className="user-name">{user.name}</div>
           <h1>Mōst Dope BJJ Tracker</h1>
         </div>
-        <button className="signout-btn" onClick={() => setUser(null)}>
+        <button className="signout-btn" onClick={handleSignOut}>
           Sign out
         </button>
         <nav className="nav-tabs">
