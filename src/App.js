@@ -16,6 +16,25 @@ function App() {
   const [googleLoaded, setGoogleLoaded] = useState(false);
   const googleButtonRef = useRef(null);
 
+  const handleGoogleResponse = async (response) => {
+    try {
+      // Sign in with Supabase using Google token
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: response.credential,
+      });
+
+      if (error) {
+        console.error('Error signing in:', error);
+        return;
+      }
+
+      setShowConsent(true);
+    } catch (error) {
+      console.error('Error during sign in:', error);
+    }
+  };
+
   // Initialize Supabase auth listener
   useEffect(() => {
     // Get initial session
@@ -153,56 +172,47 @@ function App() {
 
   // Google Sign-In initialization
   useEffect(() => {
-    if (!user && googleButtonRef.current) {
-      const initializeGoogleSignIn = () => {
-        console.log('=== Google Sign-In Debug ===');
-        console.log('User state:', user);
-        console.log('Google available:', !!window.google);
-        console.log('Button ref available:', !!googleButtonRef.current);
-        console.log('Button ref element:', googleButtonRef.current);
-        
-        if (window.google && googleButtonRef.current && !user) {
-          console.log('Setting up Google button...');
-          
-          // Clear any existing button first
-          if (googleButtonRef.current.children.length > 0) {
-            console.log('Clearing existing button content');
-            googleButtonRef.current.innerHTML = '';
-          }
-          
-          try {
-            console.log('Initializing Google Identity Services...');
-            window.google.accounts.id.initialize({
-              client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
-              callback: handleGoogleResponse,
-            });
-            
-            console.log('Rendering Google button...');
-            window.google.accounts.id.renderButton(googleButtonRef.current, {
-              theme: 'outline',
-              size: 'large',
-              width: 300,
-            });
-            
-            setGoogleLoaded(true);
-            console.log('Google button setup complete');
-          } catch (error) {
-            console.error('Error setting up Google button:', error);
-          }
-        } else {
-          console.log('Google button setup skipped:', {
-            google: !!window.google,
-            buttonRef: !!googleButtonRef.current,
-            user: !!user,
-            buttonRefElement: googleButtonRef.current
+    let attempts = 0;
+    const maxAttempts = 30; // 3 seconds
+    function tryInitGoogleButton() {
+      attempts++;
+      if (!user && googleButtonRef.current && window.google) {
+        console.log('Google Sign-In: Initializing button after polling.');
+        // Clear any existing button
+        googleButtonRef.current.innerHTML = '';
+        try {
+          window.google.accounts.id.initialize({
+            client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
+            callback: handleGoogleResponse,
           });
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: 300,
+          });
+          setGoogleLoaded(true);
+          console.log('Google button setup complete');
+        } catch (error) {
+          console.error('Error setting up Google button:', error);
         }
-      };
-
-      // Try to initialize immediately
-      initializeGoogleSignIn();
+        return true;
+      }
+      return false;
     }
-  }, [user]);
+
+    if (!user) {
+      // Try immediately
+      if (tryInitGoogleButton()) return;
+      // Otherwise, poll until ready
+      const poll = setInterval(() => {
+        if (tryInitGoogleButton() || attempts >= maxAttempts) {
+          clearInterval(poll);
+        }
+      }, 100);
+      // Cleanup
+      return () => clearInterval(poll);
+    }
+  }, [user, handleGoogleResponse]);
 
   // Handle button rendering when user state changes
   useEffect(() => {
@@ -215,25 +225,6 @@ function App() {
       });
     }
   }, [user, googleLoaded]);
-
-  const handleGoogleResponse = async (response) => {
-    try {
-      // Sign in with Supabase using Google token
-      const { error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
-        token: response.credential,
-      });
-
-      if (error) {
-        console.error('Error signing in:', error);
-        return;
-      }
-
-      setShowConsent(true);
-    } catch (error) {
-      console.error('Error during sign in:', error);
-    }
-  };
 
   const handleConsent = (consent) => {
     setShowConsent(false);
