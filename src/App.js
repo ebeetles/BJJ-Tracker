@@ -16,7 +16,7 @@ function App() {
   const [googleLoaded, setGoogleLoaded] = useState(false);
   const googleButtonRef = useRef(null);
 
-  const handleGoogleResponse = async (response) => {
+  const handleGoogleResponse = useCallback(async (response) => {
     try {
       // Sign in with Supabase using Google token
       const { error } = await supabase.auth.signInWithIdToken({
@@ -33,7 +33,7 @@ function App() {
     } catch (error) {
       console.error('Error during sign in:', error);
     }
-  };
+  }, []);
 
   // Initialize Supabase auth listener
   useEffect(() => {
