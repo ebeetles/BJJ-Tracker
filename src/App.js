@@ -64,7 +64,18 @@ function App() {
         return;
       }
 
-      setTrackingData(data || []);
+      // Map database fields back to component format
+      const mappedData = (data || []).map(entry => ({
+        id: entry.id,
+        date: entry.date,
+        matHours: entry.hours ? entry.hours.toString() : '',
+        submissionsGot: entry.submissions_got ? entry.submissions_got.split(', ').filter(s => s.trim()) : [],
+        submissionsReceived: entry.submissions_received ? entry.submissions_received.split(', ').filter(s => s.trim()) : [],
+        notes: entry.notes || ''
+      }));
+
+      console.log('Loaded data:', mappedData);
+      setTrackingData(mappedData);
     } catch (error) {
       console.error('Error loading tracking data:', error);
     }
@@ -78,31 +89,45 @@ function App() {
 
   // Save tracking data to Supabase whenever it changes
   const saveTrackingData = useCallback(async (data) => {
+    console.log('Attempting to save data:', data);
+    console.log('Current user:', user);
+    
     try {
       // Delete existing entries for this user
-      await supabase
+      console.log('Deleting existing entries for user:', user.email);
+      const { error: deleteError } = await supabase
         .from('tracking_entries')
         .delete()
         .eq('user_email', user.email);
+
+      if (deleteError) {
+        console.error('Error deleting existing data:', deleteError);
+        return;
+      }
 
       // Insert new entries
       if (data.length > 0) {
         const entriesToInsert = data.map(entry => ({
           user_email: user.email,
           date: entry.date,
-          hours: entry.hours,
-          submissions_got: entry.submissionsGot,
-          submissions_received: entry.submissionsReceived,
-          notes: entry.notes
+          hours: parseFloat(entry.matHours) || 0,
+          submissions_got: entry.submissionsGot ? entry.submissionsGot.join(', ') : '',
+          submissions_received: entry.submissionsReceived ? entry.submissionsReceived.join(', ') : '',
+          notes: entry.notes || ''
         }));
 
+        console.log('Inserting new entries:', entriesToInsert);
         const { error } = await supabase
           .from('tracking_entries')
           .insert(entriesToInsert);
 
         if (error) {
           console.error('Error saving data:', error);
+        } else {
+          console.log('Data saved successfully!');
         }
+      } else {
+        console.log('No data to save');
       }
     } catch (error) {
       console.error('Error saving tracking data:', error);
