@@ -92,6 +92,12 @@ function App() {
     console.log('Attempting to save data:', data);
     console.log('Current user:', user);
     
+    // Prevent saving if data is empty or user is not set
+    if (!user?.email || !data || data.length === 0) {
+      console.log('Skipping save - no user or empty data');
+      return;
+    }
+    
     try {
       // Delete existing entries for this user
       console.log('Deleting existing entries for user:', user.email);
@@ -134,9 +140,14 @@ function App() {
     }
   }, [user]);
 
+  // Debounced save effect to prevent multiple rapid saves
   useEffect(() => {
     if (user?.email && trackingData.length > 0) {
-      saveTrackingData(trackingData);
+      const timeoutId = setTimeout(() => {
+        saveTrackingData(trackingData);
+      }, 500); // 500ms debounce
+
+      return () => clearTimeout(timeoutId);
     }
   }, [trackingData, user, saveTrackingData]);
 
@@ -260,10 +271,26 @@ function App() {
   };
 
   const addTrackingEntry = (entry) => {
+    console.log('Adding tracking entry:', entry);
+    
     // Check if entry is an array (for updates) or single object (for new entry)
     if (Array.isArray(entry)) {
+      console.log('Updating entire tracking data array');
       setTrackingData(entry);
     } else {
+      console.log('Adding new single entry');
+      // Check if this entry already exists to prevent duplicates
+      const existingEntry = trackingData.find(e => 
+        e.date === entry.date && 
+        e.matHours === entry.matHours &&
+        e.notes === entry.notes
+      );
+      
+      if (existingEntry) {
+        console.log('Entry already exists, skipping duplicate');
+        return;
+      }
+      
       setTrackingData(prev => [...prev, { ...entry, id: Date.now() }]);
     }
   };
