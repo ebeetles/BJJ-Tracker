@@ -153,93 +153,56 @@ function App() {
 
   // Google Sign-In initialization
   useEffect(() => {
-    const initializeGoogleSignIn = () => {
-      console.log('=== Google Sign-In Debug ===');
-      console.log('User state:', user);
-      console.log('Google available:', !!window.google);
-      console.log('Button ref available:', !!googleButtonRef.current);
-      console.log('Button ref element:', googleButtonRef.current);
-      
-      if (window.google && googleButtonRef.current && !user) {
-        console.log('Setting up Google button...');
+    if (!user && googleButtonRef.current) {
+      const initializeGoogleSignIn = () => {
+        console.log('=== Google Sign-In Debug ===');
+        console.log('User state:', user);
+        console.log('Google available:', !!window.google);
+        console.log('Button ref available:', !!googleButtonRef.current);
+        console.log('Button ref element:', googleButtonRef.current);
         
-        // Clear any existing button first
-        if (googleButtonRef.current.children.length > 0) {
-          console.log('Clearing existing button content');
-          googleButtonRef.current.innerHTML = '';
-        }
-        
-        try {
-          console.log('Initializing Google Identity Services...');
-          window.google.accounts.id.initialize({
-            client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
-            callback: handleGoogleResponse,
-          });
+        if (window.google && googleButtonRef.current && !user) {
+          console.log('Setting up Google button...');
           
-          console.log('Rendering Google button...');
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            theme: 'outline',
-            size: 'large',
-            width: 300,
-          });
+          // Clear any existing button first
+          if (googleButtonRef.current.children.length > 0) {
+            console.log('Clearing existing button content');
+            googleButtonRef.current.innerHTML = '';
+          }
           
-          setGoogleLoaded(true);
-          console.log('Google button setup complete');
-        } catch (error) {
-          console.error('Error setting up Google button:', error);
+          try {
+            console.log('Initializing Google Identity Services...');
+            window.google.accounts.id.initialize({
+              client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
+              callback: handleGoogleResponse,
+            });
+            
+            console.log('Rendering Google button...');
+            window.google.accounts.id.renderButton(googleButtonRef.current, {
+              theme: 'outline',
+              size: 'large',
+              width: 300,
+            });
+            
+            setGoogleLoaded(true);
+            console.log('Google button setup complete');
+          } catch (error) {
+            console.error('Error setting up Google button:', error);
+          }
+        } else {
+          console.log('Google button setup skipped:', {
+            google: !!window.google,
+            buttonRef: !!googleButtonRef.current,
+            user: !!user,
+            buttonRefElement: googleButtonRef.current
+          });
         }
-      } else {
-        console.log('Google button setup skipped:', {
-          google: !!window.google,
-          buttonRef: !!googleButtonRef.current,
-          user: !!user,
-          buttonRefElement: googleButtonRef.current
-        });
-      }
-    };
+      };
 
-    // Only initialize if user is not signed in
-    if (!user) {
-      console.log('User not signed in, attempting to initialize Google Sign-In');
-      
       // Try to initialize immediately
       initializeGoogleSignIn();
-
-      // If Google script isn't loaded yet, wait for it with multiple attempts
-      if (!window.google) {
-        console.log('Google script not loaded, waiting...');
-        let attempts = 0;
-        const maxAttempts = 30; // 3 seconds total
-        
-        const checkGoogleLoaded = setInterval(() => {
-          attempts++;
-          console.log(`Attempt ${attempts}/${maxAttempts} - Google available:`, !!window.google);
-          
-          if (window.google) {
-            console.log('Google script loaded, initializing...');
-            clearInterval(checkGoogleLoaded);
-            initializeGoogleSignIn();
-          } else if (attempts >= maxAttempts) {
-            console.log('Google script loading timeout after', attempts, 'attempts');
-            clearInterval(checkGoogleLoaded);
-          }
-        }, 100);
-
-        // Cleanup interval after 10 seconds
-        setTimeout(() => {
-          clearInterval(checkGoogleLoaded);
-          console.log('Google script loading timeout');
-        }, 10000);
-      }
     }
-
-    // Cleanup function
-    return () => {
-      if (window.google && window.google.accounts) {
-        window.google.accounts.id.cancel();
-      }
-    };
-  }, [user, googleLoaded]);
+  }, [user, googleButtonRef.current]);
 
   // Handle button rendering when user state changes
   useEffect(() => {
