@@ -154,25 +154,29 @@ function App() {
   // Google Sign-In initialization
   useEffect(() => {
     const initializeGoogleSignIn = () => {
-      console.log('Initializing Google Sign-In...');
+      console.log('=== Google Sign-In Debug ===');
       console.log('User state:', user);
       console.log('Google available:', !!window.google);
       console.log('Button ref available:', !!googleButtonRef.current);
+      console.log('Button ref element:', googleButtonRef.current);
       
       if (window.google && googleButtonRef.current && !user) {
         console.log('Setting up Google button...');
         
         // Clear any existing button first
         if (googleButtonRef.current.children.length > 0) {
+          console.log('Clearing existing button content');
           googleButtonRef.current.innerHTML = '';
         }
         
         try {
+          console.log('Initializing Google Identity Services...');
           window.google.accounts.id.initialize({
             client_id: '399520755866-n43nvjctj1mnohaerndl8k3i50jn2olj.apps.googleusercontent.com',
             callback: handleGoogleResponse,
           });
           
+          console.log('Rendering Google button...');
           window.google.accounts.id.renderButton(googleButtonRef.current, {
             theme: 'outline',
             size: 'large',
@@ -188,7 +192,8 @@ function App() {
         console.log('Google button setup skipped:', {
           google: !!window.google,
           buttonRef: !!googleButtonRef.current,
-          user: !!user
+          user: !!user,
+          buttonRefElement: googleButtonRef.current
         });
       }
     };
@@ -204,10 +209,12 @@ function App() {
       if (!window.google) {
         console.log('Google script not loaded, waiting...');
         let attempts = 0;
-        const maxAttempts = 20; // 2 seconds total
+        const maxAttempts = 30; // 3 seconds total
         
         const checkGoogleLoaded = setInterval(() => {
           attempts++;
+          console.log(`Attempt ${attempts}/${maxAttempts} - Google available:`, !!window.google);
+          
           if (window.google) {
             console.log('Google script loaded, initializing...');
             clearInterval(checkGoogleLoaded);
