@@ -202,7 +202,7 @@ function App() {
       // Try to initialize immediately
       initializeGoogleSignIn();
     }
-  }, [user, googleButtonRef.current]);
+  }, [user]);
 
   // Handle button rendering when user state changes
   useEffect(() => {
