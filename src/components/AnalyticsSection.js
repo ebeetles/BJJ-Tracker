@@ -93,10 +93,49 @@ const AnalyticsSection = ({ trackingData }) => {
     // Calculate submission stats
     const allSubmissionsGot = trackingData.flatMap(entry => entry.submissionsGot || []);
     const allSubmissionsReceived = trackingData.flatMap(entry => entry.submissionsReceived || []);
-    
-    const totalSubmissionsGot = allSubmissionsGot.length;
-    const totalSubmissionsReceived = allSubmissionsReceived.length;
-    const submissionRatio = totalSubmissionsReceived > 0 ? totalSubmissionsGot / totalSubmissionsReceived : totalSubmissionsGot;
+    // Parse side info
+    const parseNameAndSide = (str) => {
+      const match = str.match(/^(.*) \((L|R)\)$/);
+      if (match) {
+        return { name: match[1], side: match[2] };
+      }
+      return { name: str, side: 'N' };
+    };
+    const allSubmissionsGotParsed = allSubmissionsGot.map(parseNameAndSide);
+    const allSubmissionsReceivedParsed = allSubmissionsReceived.map(parseNameAndSide);
+    // Aggregate by side
+    const sideCounts = (arr) => arr.reduce((acc, { side }) => { acc[side] = (acc[side] || 0) + 1; return acc; }, {});
+    const sideCountsGot = sideCounts(allSubmissionsGotParsed);
+    const sideCountsReceived = sideCounts(allSubmissionsReceivedParsed);
+    // Most common by side
+    const mostCommonBySide = (arr) => {
+      const bySide = { L: {}, R: {} };
+      arr.forEach(({ name, side }) => {
+        if (side === 'L' || side === 'R') {
+          bySide[side][name] = (bySide[side][name] || 0) + 1;
+        }
+      });
+      return {
+        L: Object.entries(bySide.L).sort(([,a],[,b]) => b-a)[0] || null,
+        R: Object.entries(bySide.R).sort(([,a],[,b]) => b-a)[0] || null
+      };
+    };
+    const mostCommonGotBySide = mostCommonBySide(allSubmissionsGotParsed);
+    const mostCommonReceivedBySide = mostCommonBySide(allSubmissionsReceivedParsed);
+    // Pie chart data for left/right
+    const pieChartDataGotSides = [
+      { label: 'Left', value: sideCountsGot.L || 0, color: '#2196f3' },
+      { label: 'Right', value: sideCountsGot.R || 0, color: '#fbc02d' }
+    ];
+    const pieChartDataReceivedSides = [
+      { label: 'Left', value: sideCountsReceived.L || 0, color: '#2196f3' },
+      { label: 'Right', value: sideCountsReceived.R || 0, color: '#fbc02d' }
+    ];
+    // Sweeps by side (declare after all side breakdowns)
+    let allSweepsParsed = [];
+    let sweepSideCounts = {};
+    let mostCommonSweepBySide = {};
+    let sweepPieDataSides = [];
 
     // Most common submissions
     const submissionGotCounts = {};
@@ -115,6 +154,11 @@ const AnalyticsSection = ({ trackingData }) => {
     
     const mostCommonSubmissionReceived = Object.entries(submissionReceivedCounts)
       .sort(([,a], [,b]) => b - a)[0] || null;
+
+    // Restore totalSubmissionsGot, totalSubmissionsReceived, submissionRatio
+    const totalSubmissionsGot = allSubmissionsGot.length;
+    const totalSubmissionsReceived = allSubmissionsReceived.length;
+    const submissionRatio = totalSubmissionsReceived > 0 ? totalSubmissionsGot / totalSubmissionsReceived : totalSubmissionsGot;
 
     // Weekly and monthly breakdowns
     const weeklyHours = {};
@@ -159,14 +203,21 @@ const AnalyticsSection = ({ trackingData }) => {
     ];
 
     // Sweeps and positions
-    const allSweeps = trackingData.flatMap(entry => entry.sweeps || []);
+    const allSweepsRaw = trackingData.flatMap(entry => entry.sweeps || []);
+    allSweepsParsed = allSweepsRaw.map(parseNameAndSide);
+    sweepSideCounts = sideCounts(allSweepsParsed);
+    mostCommonSweepBySide = mostCommonBySide(allSweepsParsed);
+    sweepPieDataSides = [
+      { label: 'Left', value: sweepSideCounts.L || 0, color: '#2196f3' },
+      { label: 'Right', value: sweepSideCounts.R || 0, color: '#fbc02d' }
+    ];
     const allPositions = trackingData.flatMap(entry => entry.dominantPositions || []);
-    const totalSweeps = allSweeps.length;
+    const totalSweeps = allSweepsRaw.length;
     const totalDominantPositions = allPositions.length;
 
     // Most common sweeps/positions
     const sweepCounts = {};
-    allSweeps.forEach(sweep => {
+    allSweepsRaw.forEach(sweep => {
       sweepCounts[sweep] = (sweepCounts[sweep] || 0) + 1;
     });
     const mostCommonSweep = Object.entries(sweepCounts).sort(([,a],[,b]) => b-a)[0] || null;
@@ -215,6 +266,15 @@ const AnalyticsSection = ({ trackingData }) => {
       mostCommonPosition,
       sweepPieData,
       positionPieData,
+      sideCountsGot,
+      sideCountsReceived,
+      mostCommonGotBySide,
+      mostCommonReceivedBySide,
+      pieChartDataGotSides,
+      pieChartDataReceivedSides,
+      sweepSideCounts,
+      mostCommonSweepBySide,
+      sweepPieDataSides,
     };
   }, [trackingData]);
 
@@ -335,6 +395,47 @@ const AnalyticsSection = ({ trackingData }) => {
         </div>
       </div>
 
+      {/* Left/Right Breakdown for Submissions Got */}
+      <div className="analytics-section-group">
+        <h3>Submissions You Got: Left vs Right</h3>
+        <div className="pie-chart-section">
+          <HollowPieChart data={analytics.pieChartDataGotSides} />
+          <div className="pie-legend">
+            {analytics.pieChartDataGotSides.map((item, index) => (
+              <div key={index} className="legend-item">
+                <div className="legend-color" style={{ backgroundColor: item.color }}></div>
+                <span className="legend-label">{item.label}</span>
+                <span className="legend-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="side-most-common">
+            <div>Most common (L): {analytics.mostCommonGotBySide.L ? `${analytics.mostCommonGotBySide.L[0]} (${analytics.mostCommonGotBySide.L[1]})` : 'N/A'}</div>
+            <div>Most common (R): {analytics.mostCommonGotBySide.R ? `${analytics.mostCommonGotBySide.R[0]} (${analytics.mostCommonGotBySide.R[1]})` : 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+      {/* Left/Right Breakdown for Submissions Received */}
+      <div className="analytics-section-group">
+        <h3>Submissions Done On You: Left vs Right</h3>
+        <div className="pie-chart-section">
+          <HollowPieChart data={analytics.pieChartDataReceivedSides} />
+          <div className="pie-legend">
+            {analytics.pieChartDataReceivedSides.map((item, index) => (
+              <div key={index} className="legend-item">
+                <div className="legend-color" style={{ backgroundColor: item.color }}></div>
+                <span className="legend-label">{item.label}</span>
+                <span className="legend-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="side-most-common">
+            <div>Most common (L): {analytics.mostCommonReceivedBySide.L ? `${analytics.mostCommonReceivedBySide.L[0]} (${analytics.mostCommonReceivedBySide.L[1]})` : 'N/A'}</div>
+            <div>Most common (R): {analytics.mostCommonReceivedBySide.R ? `${analytics.mostCommonReceivedBySide.R[0]} (${analytics.mostCommonReceivedBySide.R[1]})` : 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Recent Trends */}
       {analytics.recentTrends.length > 0 && (
         <div className="analytics-section-group">
@@ -431,6 +532,26 @@ const AnalyticsSection = ({ trackingData }) => {
             {analytics.mostCommonPosition && (
               <div className="analytics-label">Most Common: <b>{analytics.mostCommonPosition[0]}</b> ({analytics.mostCommonPosition[1]})</div>
             )}
+          </div>
+        </div>
+      </div>
+      {/* Left/Right Breakdown for Sweeps */}
+      <div className="analytics-section-group">
+        <h3>Sweeps: Left vs Right</h3>
+        <div className="pie-chart-section">
+          <HollowPieChart data={analytics.sweepPieDataSides} />
+          <div className="pie-legend">
+            {analytics.sweepPieDataSides.map((item, index) => (
+              <div key={index} className="legend-item">
+                <div className="legend-color" style={{ backgroundColor: item.color }}></div>
+                <span className="legend-label">{item.label}</span>
+                <span className="legend-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="side-most-common">
+            <div>Most common (L): {analytics.mostCommonSweepBySide.L ? `${analytics.mostCommonSweepBySide.L[0]} (${analytics.mostCommonSweepBySide.L[1]})` : 'N/A'}</div>
+            <div>Most common (R): {analytics.mostCommonSweepBySide.R ? `${analytics.mostCommonSweepBySide.R[0]} (${analytics.mostCommonSweepBySide.R[1]})` : 'N/A'}</div>
           </div>
         </div>
       </div>

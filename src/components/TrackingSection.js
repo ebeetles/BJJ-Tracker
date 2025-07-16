@@ -80,6 +80,10 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   const [newSubmissionReceived, setNewSubmissionReceived] = useState('');
   const [newSweep, setNewSweep] = useState('');
   const [newPosition, setNewPosition] = useState('');
+  // Add state for side selection
+  const [newSubmissionSide, setNewSubmissionSide] = useState('L');
+  const [newSubmissionReceivedSide, setNewSubmissionReceivedSide] = useState('L');
+  const [newSweepSide, setNewSweepSide] = useState('L');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,12 +120,13 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSubmissionGot = () => {
-    if (newSubmission && !formData.submissionsGot.includes(newSubmission)) {
+    if (newSubmission && !formData.submissionsGot.includes(`${newSubmission} (${newSubmissionSide})`)) {
       setFormData(prev => ({
         ...prev,
-        submissionsGot: [...prev.submissionsGot, newSubmission]
+        submissionsGot: [...prev.submissionsGot, `${newSubmission} (${newSubmissionSide})`]
       }));
       setNewSubmission('');
+      setNewSubmissionSide('L');
     }
   };
 
@@ -133,12 +138,13 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSubmissionReceived = () => {
-    if (newSubmissionReceived && !formData.submissionsReceived.includes(newSubmissionReceived)) {
+    if (newSubmissionReceived && !formData.submissionsReceived.includes(`${newSubmissionReceived} (${newSubmissionReceivedSide})`)) {
       setFormData(prev => ({
         ...prev,
-        submissionsReceived: [...prev.submissionsReceived, newSubmissionReceived]
+        submissionsReceived: [...prev.submissionsReceived, `${newSubmissionReceived} (${newSubmissionReceivedSide})`]
       }));
       setNewSubmissionReceived('');
+      setNewSubmissionReceivedSide('L');
     }
   };
 
@@ -150,12 +156,13 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSweep = () => {
-    if (newSweep && !formData.sweeps.includes(newSweep)) {
+    if (newSweep && !formData.sweeps.includes(`${newSweep} (${newSweepSide})`)) {
       setFormData(prev => ({
         ...prev,
-        sweeps: [...prev.sweeps, newSweep]
+        sweeps: [...prev.sweeps, `${newSweep} (${newSweepSide})`]
       }));
       setNewSweep('');
+      setNewSweepSide('L');
     }
   };
   const removeSweep = (sweep) => {
@@ -296,6 +303,14 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
                   </option>
                 ))}
               </select>
+              <select
+                value={newSubmissionSide}
+                onChange={e => setNewSubmissionSide(e.target.value)}
+                className="side-select"
+              >
+                <option value="L">L</option>
+                <option value="R">R</option>
+              </select>
               <button
                 type="button"
                 onClick={addSubmissionGot}
@@ -338,6 +353,14 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
                   </option>
                 ))}
               </select>
+              <select
+                value={newSubmissionReceivedSide}
+                onChange={e => setNewSubmissionReceivedSide(e.target.value)}
+                className="side-select"
+              >
+                <option value="L">L</option>
+                <option value="R">R</option>
+              </select>
               <button
                 type="button"
                 onClick={addSubmissionReceived}
@@ -378,6 +401,14 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
                 {commonSweeps.map(sweep => (
                   <option key={sweep} value={sweep}>{sweep}</option>
                 ))}
+              </select>
+              <select
+                value={newSweepSide}
+                onChange={e => setNewSweepSide(e.target.value)}
+                className="side-select"
+              >
+                <option value="L">L</option>
+                <option value="R">R</option>
               </select>
               <button
                 type="button"
