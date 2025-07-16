@@ -108,33 +108,33 @@ function App() {
     }
   }, [user, loadTrackingData]);
 
-  // Save tracking data to Supabase whenever it changes
-  const saveTrackingData = useCallback(async (data) => {
-    console.log('Attempting to save data:', data);
-    console.log('Current user:', user);
-    
-    // Prevent saving if data is empty or user is not set
-    if (!user?.email || !data || data.length === 0) {
-      console.log('Skipping save - no user or empty data');
-      return;
-    }
-    
-    try {
-      // Delete existing entries for this user
-      console.log('Deleting existing entries for user:', user.email);
-      const { error: deleteError } = await supabase
+  // Remove saveTrackingData and debounced effect
+  // Add new handlers for add, update, and delete
+
+  const addTrackingEntry = async (entry) => {
+    if (!user?.email) return;
+    // If entry has an id, update; else, insert
+    if (entry.id) {
+      // Update existing entry
+      const { error } = await supabase
         .from('tracking_entries')
-        .delete()
+        .update({
+          date: entry.date,
+          hours: parseFloat(entry.matHours) || 0,
+          submissions_got: entry.submissionsGot ? entry.submissionsGot.join(', ') : '',
+          submissions_received: entry.submissionsReceived ? entry.submissionsReceived.join(', ') : '',
+          sweeps: entry.sweeps ? entry.sweeps.join(', ') : '',
+          dominant_positions: entry.dominantPositions ? entry.dominantPositions.join(', ') : '',
+          notes: entry.notes || ''
+        })
+        .eq('id', entry.id)
         .eq('user_email', user.email);
-
-      if (deleteError) {
-        console.error('Error deleting existing data:', deleteError);
-        return;
-      }
-
-      // Insert new entries
-      if (data.length > 0) {
-        const entriesToInsert = data.map(entry => ({
+      if (!error) loadTrackingData();
+    } else {
+      // Insert new entry
+      const { error } = await supabase
+        .from('tracking_entries')
+        .insert({
           user_email: user.email,
           date: entry.date,
           hours: parseFloat(entry.matHours) || 0,
@@ -143,36 +143,20 @@ function App() {
           sweeps: entry.sweeps ? entry.sweeps.join(', ') : '',
           dominant_positions: entry.dominantPositions ? entry.dominantPositions.join(', ') : '',
           notes: entry.notes || ''
-        }));
-
-        console.log('Inserting new entries:', entriesToInsert);
-        const { error } = await supabase
-          .from('tracking_entries')
-          .insert(entriesToInsert);
-
-        if (error) {
-          console.error('Error saving data:', error);
-        } else {
-          console.log('Data saved successfully!');
-        }
-      } else {
-        console.log('No data to save');
-      }
-    } catch (error) {
-      console.error('Error saving tracking data:', error);
+        });
+      if (!error) loadTrackingData();
     }
-  }, [user]);
+  };
 
-  // Debounced save effect to prevent multiple rapid saves
-  useEffect(() => {
-    if (user?.email && trackingData.length > 0) {
-      const timeoutId = setTimeout(() => {
-        saveTrackingData(trackingData);
-      }, 500); // 500ms debounce
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [trackingData, user, saveTrackingData]);
+  const deleteTrackingEntry = async (id) => {
+    if (!user?.email) return;
+    const { error } = await supabase
+      .from('tracking_entries')
+      .delete()
+      .eq('id', id)
+      .eq('user_email', user.email);
+    if (!error) loadTrackingData();
+  };
 
   // Google Sign-In initialization
   useEffect(() => {
@@ -235,38 +219,15 @@ function App() {
     // Consent is handled automatically by Supabase
   };
 
-  const addTrackingEntry = (entry) => {
-    console.log('Adding tracking entry:', entry);
-    
-    // Check if entry is an array (for updates) or single object (for new entry)
-    if (Array.isArray(entry)) {
-      console.log('Updating entire tracking data array');
-      setTrackingData(entry);
-    } else {
-      console.log('Adding new single entry');
-      // Check if this entry already exists to prevent duplicates
-      const existingEntry = trackingData.find(e => 
-        e.date === entry.date && 
-        e.matHours === entry.matHours &&
-        e.notes === entry.notes
-      );
-      
-      if (existingEntry) {
-        console.log('Entry already exists, skipping duplicate');
-        return;
-      }
-      
-      setTrackingData(prev => [...prev, { ...entry, id: Date.now() }]);
-    }
+  // Handle sign out
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setTrackingData([]);
   };
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  // Pass these handlers to TrackingSection
+  // ...
 
   if (loading) {
     return (
@@ -371,6 +332,7 @@ function App() {
           <TrackingSection 
             trackingData={trackingData}
             onAddEntry={addTrackingEntry}
+            onDeleteEntry={deleteTrackingEntry}
           />
         )}
         {activeSection === 'learning' && (

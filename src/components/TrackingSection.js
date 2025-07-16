@@ -64,7 +64,7 @@ const commonPositions = [
   'Other'
 ];
 
-const TrackingSection = ({ trackingData, onAddEntry }) => {
+const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
@@ -81,19 +81,16 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
   const [newSweep, setNewSweep] = useState('');
   const [newPosition, setNewPosition] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.matHours || formData.submissionsGot.length > 0 || formData.submissionsReceived.length > 0 || formData.notes) {
       if (editingEntry) {
         // Update existing entry
-        const updatedData = trackingData.map(entry => 
-          entry.id === editingEntry.id ? { ...formData, id: entry.id } : entry
-        );
-        onAddEntry(updatedData);
+        await onAddEntry({ ...formData, id: editingEntry.id });
         setEditingEntry(null);
       } else {
         // Add new entry
-        onAddEntry(formData);
+        await onAddEntry(formData);
       }
       
       // Reset form
@@ -211,10 +208,9 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
     });
   };
 
-  const handleDelete = (entryId) => {
+  const handleDelete = async (entryId) => {
     if (window.confirm('Are you sure you want to delete this entry?')) {
-      const updatedData = trackingData.filter(entry => entry.id !== entryId);
-      onAddEntry(updatedData);
+      await onDeleteEntry(entryId);
     }
   };
 
