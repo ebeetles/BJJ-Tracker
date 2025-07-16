@@ -4,6 +4,7 @@ import './TrackingSection.css';
 const commonSubmissions = [
   'Triangle Choke',
   'Armbar',
+  'Ezekiel Choke',
   'Kimura',
   'Guillotine Choke',
   'Rear Naked Choke',
@@ -30,6 +31,39 @@ const commonSubmissions = [
   'Other'
 ];
 
+const commonSweeps = [
+  'Scissor Sweep',
+  'Hip Bump Sweep',
+  'Flower Sweep',
+  'Lumberjack Sweep',
+  'Pendulum Sweep',
+  'X-Guard Sweep',
+  'Tripod Sweep',
+  'Sit-up Sweep',
+  'Tornado Sweep',
+  'Butterfly Sweep',
+  'Tomiya Sweep',
+  'Balloon Sweep',
+  'Other'
+];
+
+const commonPositions = [
+  'Mount',
+  'Back Control',
+  'Side Control',
+  'Knee on Belly',
+  'North-South',
+  'Closed Guard',
+  'Open Guard',
+  'Half Guard',
+  'Turtle',
+  'Crucifix',
+  '50/50',
+  'De La Riva',
+  'Spider Guard',
+  'Other'
+];
+
 const TrackingSection = ({ trackingData, onAddEntry }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
@@ -38,10 +72,14 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
     matHours: '',
     submissionsGot: [],
     submissionsReceived: [],
+    sweeps: [],
+    dominantPositions: [],
     notes: ''
   });
   const [newSubmission, setNewSubmission] = useState('');
   const [newSubmissionReceived, setNewSubmissionReceived] = useState('');
+  const [newSweep, setNewSweep] = useState('');
+  const [newPosition, setNewPosition] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,6 +102,8 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
         matHours: '',
         submissionsGot: [],
         submissionsReceived: [],
+        sweeps: [],
+        dominantPositions: [],
         notes: ''
       });
       setShowAddForm(false);
@@ -112,6 +152,37 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
     }));
   };
 
+  const addSweep = () => {
+    if (newSweep && !formData.sweeps.includes(newSweep)) {
+      setFormData(prev => ({
+        ...prev,
+        sweeps: [...prev.sweeps, newSweep]
+      }));
+      setNewSweep('');
+    }
+  };
+  const removeSweep = (sweep) => {
+    setFormData(prev => ({
+      ...prev,
+      sweeps: prev.sweeps.filter(s => s !== sweep)
+    }));
+  };
+  const addPosition = () => {
+    if (newPosition && !formData.dominantPositions.includes(newPosition)) {
+      setFormData(prev => ({
+        ...prev,
+        dominantPositions: [...prev.dominantPositions, newPosition]
+      }));
+      setNewPosition('');
+    }
+  };
+  const removePosition = (pos) => {
+    setFormData(prev => ({
+      ...prev,
+      dominantPositions: prev.dominantPositions.filter(p => p !== pos)
+    }));
+  };
+
   const handleEdit = (entry) => {
     setEditingEntry(entry);
     setFormData({
@@ -119,6 +190,8 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
       matHours: entry.matHours || '',
       submissionsGot: entry.submissionsGot || [],
       submissionsReceived: entry.submissionsReceived || [],
+      sweeps: entry.sweeps || [],
+      dominantPositions: entry.dominantPositions || [],
       notes: entry.notes || ''
     });
     setShowAddForm(true);
@@ -132,6 +205,8 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
       matHours: '',
       submissionsGot: [],
       submissionsReceived: [],
+      sweeps: [],
+      dominantPositions: [],
       notes: ''
     });
   };
@@ -295,6 +370,83 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="sweeps">Sweeps:</label>
+            <div className="submission-input-group">
+              <select
+                className="submission-select"
+                id="sweeps"
+                value={newSweep}
+                onChange={e => setNewSweep(e.target.value)}
+              >
+                <option value="">Select sweep...</option>
+                {commonSweeps.map(sweep => (
+                  <option key={sweep} value={sweep}>{sweep}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="add-submission-btn"
+                onClick={addSweep}
+                disabled={!newSweep}
+              >
+                Add
+              </button>
+            </div>
+            <div className="submissions-list">
+              {formData.sweeps.map(sweep => (
+                <span className="submission-tag" key={sweep}>
+                  {sweep}
+                  <button
+                    type="button"
+                    className="remove-submission-btn"
+                    onClick={() => removeSweep(sweep)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="dominantPositions">Dominant Positions:</label>
+            <div className="submission-input-group">
+              <select
+                className="submission-select"
+                id="dominantPositions"
+                value={newPosition}
+                onChange={e => setNewPosition(e.target.value)}
+              >
+                <option value="">Select position...</option>
+                {commonPositions.map(pos => (
+                  <option key={pos} value={pos}>{pos}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="add-submission-btn"
+                onClick={addPosition}
+                disabled={!newPosition}
+              >
+                Add
+              </button>
+            </div>
+            <div className="submissions-list">
+              {formData.dominantPositions.map(pos => (
+                <span className="submission-tag" key={pos}>
+                  {pos}
+                  <button
+                    type="button"
+                    className="remove-submission-btn"
+                    onClick={() => removePosition(pos)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="notes">Notes:</label>
             <textarea
               id="notes"
@@ -383,6 +535,29 @@ const TrackingSection = ({ trackingData, onAddEntry }) => {
                       </div>
                     </div>
                   )}
+                  
+                  <div className="entry-section">
+                    <h4>🔄 Sweeps:</h4>
+                    <div className="submissions-display">
+                      {(entry.sweeps && entry.sweeps.length > 0)
+                        ? entry.sweeps.map((sweep, index) => (
+                            <span key={index} className="submission-badge got">{sweep}</span>
+                          ))
+                        : <span className="submission-badge sweep empty">None</span>
+                      }
+                    </div>
+                  </div>
+                  <div className="entry-section">
+                    <h4>👊 Dominant Positions:</h4>
+                    <div className="submissions-display">
+                      {(entry.dominantPositions && entry.dominantPositions.length > 0)
+                        ? entry.dominantPositions.map((pos, index) => (
+                            <span key={index} className="submission-badge got">{pos}</span>
+                          ))
+                        : <span className="submission-badge dominant-position empty">None</span>
+                      }
+                    </div>
+                  </div>
                   
                   {entry.notes && (
                     <div className="entry-section">

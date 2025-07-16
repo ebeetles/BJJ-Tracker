@@ -75,7 +75,13 @@ const AnalyticsSection = ({ trackingData }) => {
         monthlyHours: [],
         submissionStats: {},
         recentTrends: [],
-        pieChartData: []
+        pieChartData: [],
+        totalSweeps: 0,
+        totalDominantPositions: 0,
+        mostCommonSweep: null,
+        mostCommonPosition: null,
+        sweepPieData: [],
+        positionPieData: [],
       };
     }
 
@@ -152,6 +158,43 @@ const AnalyticsSection = ({ trackingData }) => {
       }
     ];
 
+    // Sweeps and positions
+    const allSweeps = trackingData.flatMap(entry => entry.sweeps || []);
+    const allPositions = trackingData.flatMap(entry => entry.dominantPositions || []);
+    const totalSweeps = allSweeps.length;
+    const totalDominantPositions = allPositions.length;
+
+    // Most common sweeps/positions
+    const sweepCounts = {};
+    allSweeps.forEach(sweep => {
+      sweepCounts[sweep] = (sweepCounts[sweep] || 0) + 1;
+    });
+    const mostCommonSweep = Object.entries(sweepCounts).sort(([,a],[,b]) => b-a)[0] || null;
+
+    const positionCounts = {};
+    allPositions.forEach(pos => {
+      positionCounts[pos] = (positionCounts[pos] || 0) + 1;
+    });
+    const mostCommonPosition = Object.entries(positionCounts).sort(([,a],[,b]) => b-a)[0] || null;
+
+    // Pie chart data for sweeps/positions (top 5)
+    const sweepPieData = Object.entries(sweepCounts)
+      .sort(([,a],[,b]) => b-a)
+      .slice(0,5)
+      .map(([label, value], i) => ({
+        label,
+        value,
+        color: ['#2196f3','#00bcd4','#3f51b5','#009688','#1976d2'][i%5]
+      }));
+    const positionPieData = Object.entries(positionCounts)
+      .sort(([,a],[,b]) => b-a)
+      .slice(0,5)
+      .map(([label, value], i) => ({
+        label,
+        value,
+        color: ['#ff9800','#ffc107','#ffb300','#ffa726','#ff7043'][i%5]
+      }));
+
     return {
       totalMatHours,
       totalSessions,
@@ -165,7 +208,13 @@ const AnalyticsSection = ({ trackingData }) => {
       monthlyHours: Object.entries(monthlyHours).sort(([a], [b]) => a.localeCompare(b)),
       submissionStats: { ...submissionGotCounts, ...submissionReceivedCounts },
       recentTrends,
-      pieChartData
+      pieChartData,
+      totalSweeps,
+      totalDominantPositions,
+      mostCommonSweep,
+      mostCommonPosition,
+      sweepPieData,
+      positionPieData,
     };
   }, [trackingData]);
 
@@ -359,6 +408,29 @@ const AnalyticsSection = ({ trackingData }) => {
                   <span className="submission-count">{count}</span>
                 </div>
               ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sweeps and Dominant Positions */}
+      <div className="analytics-section-group">
+        <h3>Sweeps and Dominant Positions</h3>
+        <div className="analytics-row">
+          <div className="analytics-card">
+            <h3>Total Sweeps</h3>
+            <div className="analytics-value">{analytics.totalSweeps}</div>
+            {analytics.sweepPieData.length > 0 && <HollowPieChart data={analytics.sweepPieData} size={120} />}
+            {analytics.mostCommonSweep && (
+              <div className="analytics-label">Most Common: <b>{analytics.mostCommonSweep[0]}</b> ({analytics.mostCommonSweep[1]})</div>
+            )}
+          </div>
+          <div className="analytics-card">
+            <h3>Total Dominant Positions</h3>
+            <div className="analytics-value">{analytics.totalDominantPositions}</div>
+            {analytics.positionPieData.length > 0 && <HollowPieChart data={analytics.positionPieData} size={120} />}
+            {analytics.mostCommonPosition && (
+              <div className="analytics-label">Most Common: <b>{analytics.mostCommonPosition[0]}</b> ({analytics.mostCommonPosition[1]})</div>
+            )}
           </div>
         </div>
       </div>

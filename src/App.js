@@ -90,6 +90,8 @@ function App() {
         matHours: entry.hours ? entry.hours.toString() : '',
         submissionsGot: entry.submissions_got ? entry.submissions_got.split(', ').filter(s => s.trim()) : [],
         submissionsReceived: entry.submissions_received ? entry.submissions_received.split(', ').filter(s => s.trim()) : [],
+        sweeps: entry.sweeps ? entry.sweeps.split(', ').filter(s => s.trim()) : [],
+        dominantPositions: entry.dominant_positions ? entry.dominant_positions.split(', ').filter(s => s.trim()) : [],
         notes: entry.notes || ''
       }));
 
@@ -138,6 +140,8 @@ function App() {
           hours: parseFloat(entry.matHours) || 0,
           submissions_got: entry.submissionsGot ? entry.submissionsGot.join(', ') : '',
           submissions_received: entry.submissionsReceived ? entry.submissionsReceived.join(', ') : '',
+          sweeps: entry.sweeps ? entry.sweeps.join(', ') : '',
+          dominant_positions: entry.dominantPositions ? entry.dominantPositions.join(', ') : '',
           notes: entry.notes || ''
         }));
 

@@ -36,6 +36,10 @@ CREATE POLICY "Users can update own tracking entries" ON tracking_entries
 CREATE POLICY "Users can delete own tracking entries" ON tracking_entries
   FOR DELETE USING (auth.jwt() ->> 'email' = user_email);
 
+-- Add sweeps and dominant_positions columns
+ALTER TABLE tracking_entries ADD COLUMN sweeps TEXT;
+ALTER TABLE tracking_entries ADD COLUMN dominant_positions TEXT;
+
 -- Create function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
