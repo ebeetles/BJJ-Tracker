@@ -112,7 +112,7 @@ const LearningSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  const [activeTab, setActiveTab] = useState('techniques'); // 'techniques' or 'ai-assistant'
+  const [activeTab, setActiveTab] = useState('ai-assistant'); // 'techniques' or 'ai-assistant'
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
