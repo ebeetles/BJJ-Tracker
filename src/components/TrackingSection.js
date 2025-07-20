@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './TrackingSection.css';
+import Downshift from 'downshift';
 
 const commonSubmissions = [
   'Triangle Choke',
@@ -80,10 +81,6 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   const [newSubmissionReceived, setNewSubmissionReceived] = useState('');
   const [newSweep, setNewSweep] = useState('');
   const [newPosition, setNewPosition] = useState('');
-  // Add state for side selection
-  const [newSubmissionSide, setNewSubmissionSide] = useState('L');
-  const [newSubmissionReceivedSide, setNewSubmissionReceivedSide] = useState('L');
-  const [newSweepSide, setNewSweepSide] = useState('L');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,13 +117,12 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSubmissionGot = () => {
-    if (newSubmission && !formData.submissionsGot.includes(`${newSubmission} (${newSubmissionSide})`)) {
+    if (newSubmission && !formData.submissionsGot.includes(newSubmission)) {
       setFormData(prev => ({
         ...prev,
-        submissionsGot: [...prev.submissionsGot, `${newSubmission} (${newSubmissionSide})`]
+        submissionsGot: [...prev.submissionsGot, newSubmission]
       }));
       setNewSubmission('');
-      setNewSubmissionSide('L');
     }
   };
 
@@ -138,13 +134,12 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSubmissionReceived = () => {
-    if (newSubmissionReceived && !formData.submissionsReceived.includes(`${newSubmissionReceived} (${newSubmissionReceivedSide})`)) {
+    if (newSubmissionReceived && !formData.submissionsReceived.includes(newSubmissionReceived)) {
       setFormData(prev => ({
         ...prev,
-        submissionsReceived: [...prev.submissionsReceived, `${newSubmissionReceived} (${newSubmissionReceivedSide})`]
+        submissionsReceived: [...prev.submissionsReceived, newSubmissionReceived]
       }));
       setNewSubmissionReceived('');
-      setNewSubmissionReceivedSide('L');
     }
   };
 
@@ -156,13 +151,12 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
   };
 
   const addSweep = () => {
-    if (newSweep && !formData.sweeps.includes(`${newSweep} (${newSweepSide})`)) {
+    if (newSweep && !formData.sweeps.includes(newSweep)) {
       setFormData(prev => ({
         ...prev,
-        sweeps: [...prev.sweeps, `${newSweep} (${newSweepSide})`]
+        sweeps: [...prev.sweeps, newSweep]
       }));
       setNewSweep('');
-      setNewSweepSide('L');
     }
   };
   const removeSweep = (sweep) => {
@@ -291,34 +285,61 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
           <div className="form-group">
             <label>Submissions You Got:</label>
             <div className="submission-input-group">
-              <select
-                value={newSubmission}
-                onChange={(e) => setNewSubmission(e.target.value)}
-                className="submission-select"
+              <Downshift
+                inputValue={newSubmission}
+                onInputValueChange={setNewSubmission}
+                onSelect={selection => {
+                  setNewSubmission(selection);
+                  addSubmissionGot();
+                }}
+                itemToString={item => item || ''}
               >
-                <option value="">Select submission...</option>
-                {commonSubmissions.map(submission => (
-                  <option key={submission} value={submission}>
-                    {submission}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={newSubmissionSide}
-                onChange={e => setNewSubmissionSide(e.target.value)}
-                className="side-select"
-              >
-                <option value="L">L</option>
-                <option value="R">R</option>
-              </select>
-              <button
-                type="button"
-                onClick={addSubmissionGot}
-                className="add-submission-btn"
-                disabled={!newSubmission}
-              >
-                Add
-              </button>
+                {({ getInputProps, getItemProps, getMenuProps, isOpen, inputValue, highlightedIndex, selectedItem }) => (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      {...getInputProps({
+                        placeholder: 'Type or select submission...'
+                      })}
+                      className="submission-select"
+                      style={{ width: '100%' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={addSubmissionGot}
+                      className="add-submission-btn"
+                      disabled={!newSubmission}
+                    >
+                      Add
+                    </button>
+                    <ul {...getMenuProps()} className="autocomplete-menu">
+                      {isOpen &&
+                        commonSubmissions
+                          .filter(item =>
+                            !inputValue || item.toLowerCase().includes(inputValue.toLowerCase())
+                          )
+                          .slice(0, 8)
+                          .map((item, index) => (
+                            <li
+                              {...getItemProps({
+                                key: item,
+                                index,
+                                item,
+                                style: {
+                                  backgroundColor:
+                                    highlightedIndex === index ? '#eee' : 'white',
+                                  fontWeight: selectedItem === item ? 'bold' : 'normal',
+                                  padding: '0.5rem',
+                                  cursor: 'pointer'
+                                }
+                              })}
+                            >
+                              {item}
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+                )}
+              </Downshift>
             </div>
             {formData.submissionsGot.length > 0 && (
               <div className="submissions-list">
@@ -341,34 +362,61 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
           <div className="form-group">
             <label>Submissions Done On You:</label>
             <div className="submission-input-group">
-              <select
-                value={newSubmissionReceived}
-                onChange={(e) => setNewSubmissionReceived(e.target.value)}
-                className="submission-select"
+              <Downshift
+                inputValue={newSubmissionReceived}
+                onInputValueChange={setNewSubmissionReceived}
+                onSelect={selection => {
+                  setNewSubmissionReceived(selection);
+                  addSubmissionReceived();
+                }}
+                itemToString={item => item || ''}
               >
-                <option value="">Select submission...</option>
-                {commonSubmissions.map(submission => (
-                  <option key={submission} value={submission}>
-                    {submission}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={newSubmissionReceivedSide}
-                onChange={e => setNewSubmissionReceivedSide(e.target.value)}
-                className="side-select"
-              >
-                <option value="L">L</option>
-                <option value="R">R</option>
-              </select>
-              <button
-                type="button"
-                onClick={addSubmissionReceived}
-                className="add-submission-btn"
-                disabled={!newSubmissionReceived}
-              >
-                Add
-              </button>
+                {({ getInputProps, getItemProps, getMenuProps, isOpen, inputValue, highlightedIndex, selectedItem }) => (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      {...getInputProps({
+                        placeholder: 'Type or select submission...'
+                      })}
+                      className="submission-select"
+                      style={{ width: '100%' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={addSubmissionReceived}
+                      className="add-submission-btn"
+                      disabled={!newSubmissionReceived}
+                    >
+                      Add
+                    </button>
+                    <ul {...getMenuProps()} className="autocomplete-menu">
+                      {isOpen &&
+                        commonSubmissions
+                          .filter(item =>
+                            !inputValue || item.toLowerCase().includes(inputValue.toLowerCase())
+                          )
+                          .slice(0, 8)
+                          .map((item, index) => (
+                            <li
+                              {...getItemProps({
+                                key: item,
+                                index,
+                                item,
+                                style: {
+                                  backgroundColor:
+                                    highlightedIndex === index ? '#eee' : 'white',
+                                  fontWeight: selectedItem === item ? 'bold' : 'normal',
+                                  padding: '0.5rem',
+                                  cursor: 'pointer'
+                                }
+                              })}
+                            >
+                              {item}
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+                )}
+              </Downshift>
             </div>
             {formData.submissionsReceived.length > 0 && (
               <div className="submissions-list">
@@ -391,33 +439,61 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
           <div className="form-group">
             <label htmlFor="sweeps">Sweeps:</label>
             <div className="submission-input-group">
-              <select
-                className="submission-select"
-                id="sweeps"
-                value={newSweep}
-                onChange={e => setNewSweep(e.target.value)}
+              <Downshift
+                inputValue={newSweep}
+                onInputValueChange={setNewSweep}
+                onSelect={selection => {
+                  setNewSweep(selection);
+                  addSweep();
+                }}
+                itemToString={item => item || ''}
               >
-                <option value="">Select sweep...</option>
-                {commonSweeps.map(sweep => (
-                  <option key={sweep} value={sweep}>{sweep}</option>
-                ))}
-              </select>
-              <select
-                value={newSweepSide}
-                onChange={e => setNewSweepSide(e.target.value)}
-                className="side-select"
-              >
-                <option value="L">L</option>
-                <option value="R">R</option>
-              </select>
-              <button
-                type="button"
-                className="add-submission-btn"
-                onClick={addSweep}
-                disabled={!newSweep}
-              >
-                Add
-              </button>
+                {({ getInputProps, getItemProps, getMenuProps, isOpen, inputValue, highlightedIndex, selectedItem }) => (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      {...getInputProps({
+                        placeholder: 'Type or select sweep...'
+                      })}
+                      className="submission-select"
+                      style={{ width: '100%' }}
+                    />
+                    <button
+                      type="button"
+                      className="add-submission-btn"
+                      onClick={addSweep}
+                      disabled={!newSweep}
+                    >
+                      Add
+                    </button>
+                    <ul {...getMenuProps()} className="autocomplete-menu">
+                      {isOpen &&
+                        commonSweeps
+                          .filter(item =>
+                            !inputValue || item.toLowerCase().includes(inputValue.toLowerCase())
+                          )
+                          .slice(0, 8)
+                          .map((item, index) => (
+                            <li
+                              {...getItemProps({
+                                key: item,
+                                index,
+                                item,
+                                style: {
+                                  backgroundColor:
+                                    highlightedIndex === index ? '#eee' : 'white',
+                                  fontWeight: selectedItem === item ? 'bold' : 'normal',
+                                  padding: '0.5rem',
+                                  cursor: 'pointer'
+                                }
+                              })}
+                            >
+                              {item}
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+                )}
+              </Downshift>
             </div>
             <div className="submissions-list">
               {formData.sweeps.map(sweep => (
@@ -434,28 +510,65 @@ const TrackingSection = ({ trackingData, onAddEntry, onDeleteEntry }) => {
               ))}
             </div>
           </div>
+
           <div className="form-group">
             <label htmlFor="dominantPositions">Dominant Positions:</label>
             <div className="submission-input-group">
-              <select
-                className="submission-select"
-                id="dominantPositions"
-                value={newPosition}
-                onChange={e => setNewPosition(e.target.value)}
+              <Downshift
+                inputValue={newPosition}
+                onInputValueChange={setNewPosition}
+                onSelect={selection => {
+                  setNewPosition(selection);
+                  addPosition();
+                }}
+                itemToString={item => item || ''}
               >
-                <option value="">Select position...</option>
-                {commonPositions.map(pos => (
-                  <option key={pos} value={pos}>{pos}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="add-submission-btn"
-                onClick={addPosition}
-                disabled={!newPosition}
-              >
-                Add
-              </button>
+                {({ getInputProps, getItemProps, getMenuProps, isOpen, inputValue, highlightedIndex, selectedItem }) => (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      {...getInputProps({
+                        placeholder: 'Type or select position...'
+                      })}
+                      className="submission-select"
+                      style={{ width: '100%' }}
+                    />
+                    <button
+                      type="button"
+                      className="add-submission-btn"
+                      onClick={addPosition}
+                      disabled={!newPosition}
+                    >
+                      Add
+                    </button>
+                    <ul {...getMenuProps()} className="autocomplete-menu">
+                      {isOpen &&
+                        commonPositions
+                          .filter(item =>
+                            !inputValue || item.toLowerCase().includes(inputValue.toLowerCase())
+                          )
+                          .slice(0, 8)
+                          .map((item, index) => (
+                            <li
+                              {...getItemProps({
+                                key: item,
+                                index,
+                                item,
+                                style: {
+                                  backgroundColor:
+                                    highlightedIndex === index ? '#eee' : 'white',
+                                  fontWeight: selectedItem === item ? 'bold' : 'normal',
+                                  padding: '0.5rem',
+                                  cursor: 'pointer'
+                                }
+                              })}
+                            >
+                              {item}
+                            </li>
+                          ))}
+                    </ul>
+                  </div>
+                )}
+              </Downshift>
             </div>
             <div className="submissions-list">
               {formData.dominantPositions.map(pos => (
